@@ -1,5 +1,8 @@
 const TOKEN_KEY = 'arandu_token'
 
+/** Base del backend. En local vacío → Vite proxy `/api` → :8080. En Vercel: URL pública del API. */
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') || ''
+
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY)
 }
@@ -28,7 +31,7 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   const token = getToken()
   if (token) headers.set('Authorization', `Bearer ${token}`)
 
-  const response = await fetch(path, { ...options, headers })
+  const response = await fetch(`${API_BASE}${path}`, { ...options, headers })
   if (response.status === 204) return undefined as T
 
   const data = await response.json().catch(() => ({}))
